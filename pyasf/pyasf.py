@@ -20,8 +20,25 @@ class _NpEncoder(json.JSONEncoder):
 
 class ControllerLink():
     """Handles the communication with the asf controller.
+    Every message send in dict gets acknoledged by the controller.
     
-    Every message send in dict gets acknoledged by the controller."""
+    data that will be sent, should have the following format:
+
+        data = {"panel_orientation": [azimuth_0, altitude_0,
+                                      ...
+                                      azimuth_30, altitude_30]}
+        where the number of the panel corresponds to 
+            nr_panel = row*6 + col
+
+    Example Usage:
+    controller_link = ControllerLink("192.168.0.10", port="5566")
+    status = controller_link.communicate(data)
+    if status:
+        continue
+    else:
+        break
+    
+    """
 
     def __init__(self, ip, port="5566"):
         self.context = zmq.Context()

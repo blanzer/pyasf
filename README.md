@@ -3,7 +3,7 @@
 
 ## Table of contents
 * [Usage](#usage)
-* [Setup](#setup)
+* [Install](#install)
 * [Features](#features)
 * [Contact](#contact)
 
@@ -12,7 +12,15 @@
 [Documentation](https://htmlpreview.github.io/?https://github.com/blanzer/pyasf/blob/main/doc/pyasf.html)
 
 
-## Setup
+## Install
+
+
+```
+pipenv install -e git+https://github.com/blanzer/pyasf.git@main#egg=pyasf
+
+pip install -e git+https://github.com/blanzer/pyasf.git@main#egg=pyasf
+```
+
 Describe how to install / setup your local environement / add link to demo version.
 
 

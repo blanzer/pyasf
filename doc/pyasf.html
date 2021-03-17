@@ -48,8 +48,25 @@ class _NpEncoder(json.JSONEncoder):
 
 class ControllerLink():
     &#34;&#34;&#34;Handles the communication with the asf controller.
+    Every message send in dict gets acknoledged by the controller.
     
-    Every message send in dict gets acknoledged by the controller.&#34;&#34;&#34;
+    data that will be sent, should have the following format:
+
+        data = {&#34;panel_orientation&#34;: [azimuth_0, altitude_0,
+                                      ...
+                                      azimuth_30, altitude_30]}
+        where the number of the panel corresponds to 
+            nr_panel = row*6 + col
+
+    Example Usage:
+    controller_link = ControllerLink(&#34;192.168.0.10&#34;, port=&#34;5566&#34;)
+    status = controller_link.communicate(data)
+    if status:
+        continue
+    else:
+        break
+    
+    &#34;&#34;&#34;
 
     def __init__(self, ip, port=&#34;5566&#34;):
         self.context = zmq.Context()
@@ -104,16 +121,47 @@ class ControllerLink():
 <span>(</span><span>ip, port='5566')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Handles the communication with the asf controller.</p>
-<p>Every message send in dict gets acknoledged by the controller.</p></div>
+<div class="desc"><p>Handles the communication with the asf controller.
+Every message send in dict gets acknoledged by the controller.</p>
+<p>data that will be sent, should have the following format:</p>
+<pre><code>data = {"panel_orientation": [azimuth_0, altitude_0,
+                              ...
+                              azimuth_30, altitude_30]}
+where the number of the panel corresponds to 
+    nr_panel = row*6 + col
+</code></pre>
+<p>Example Usage:
+controller_link = ControllerLink("192.168.0.10", port="5566")
+status = controller_link.communicate(data)
+if status:
+continue
+else:
+break</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class ControllerLink():
     &#34;&#34;&#34;Handles the communication with the asf controller.
+    Every message send in dict gets acknoledged by the controller.
     
-    Every message send in dict gets acknoledged by the controller.&#34;&#34;&#34;
+    data that will be sent, should have the following format:
+
+        data = {&#34;panel_orientation&#34;: [azimuth_0, altitude_0,
+                                      ...
+                                      azimuth_30, altitude_30]}
+        where the number of the panel corresponds to 
+            nr_panel = row*6 + col
+
+    Example Usage:
+    controller_link = ControllerLink(&#34;192.168.0.10&#34;, port=&#34;5566&#34;)
+    status = controller_link.communicate(data)
+    if status:
+        continue
+    else:
+        break
+    
+    &#34;&#34;&#34;
 
     def __init__(self, ip, port=&#34;5566&#34;):
         self.context = zmq.Context()
