@@ -77,3 +77,24 @@ class ControllerLink():
             return 0
 
         return 1
+
+    def all_opening():
+        open_state =  {"panel_orientation": [ axis for panel in range(30) for axis in [0, 90] ]}
+        self.communicate(open_state)
+    
+    def all_closing():
+        closed_state =  {"panel_orientation": [ axis for panel in range(30) for axis in [0, 10] ]}
+        self.communicate(closed_state)
+    
+    def all_east():
+        all_east =  {"panel_orientation": [ axis for panel in range(30) for axis in [-45, 45] ]}
+        self.communicate(all_east)   
+
+    def all_west():
+        all_west =  {"panel_orientation": [ axis for panel in range(30) for axis in [45, 45] ]}
+        self.communicate(all_west)
+    
+    def all_panels(azimuth, altitude):
+        all_panels =  {"panel_orientation": [ axis for panel in range(30) for axis in [azimuth, altitude] ]}
+        self.communicate(all_panels)
+        
