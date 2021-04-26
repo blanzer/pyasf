@@ -2,7 +2,7 @@ import zmq
 import json
 from loguru import logger
 import pathlib
-import utils
+import pyasf.utils
 
 
 class ControllerLink():
@@ -65,23 +65,23 @@ class ControllerLink():
 
         return 1
 
-    def all_opening():
+    def all_opening(self):
         open_state =  {"panel_orientation": [ axis for panel in range(30) for axis in [0, 90] ]}
         self.communicate(open_state)
     
-    def all_closing():
+    def all_closing(self):
         closed_state =  {"panel_orientation": [ axis for panel in range(30) for axis in [0, 10] ]}
         self.communicate(closed_state)
     
-    def all_east():
+    def all_east(self):
         all_east =  {"panel_orientation": [ axis for panel in range(30) for axis in [-45, 45] ]}
         self.communicate(all_east)   
 
-    def all_west():
+    def all_west(self):
         all_west =  {"panel_orientation": [ axis for panel in range(30) for axis in [45, 45] ]}
         self.communicate(all_west)
     
-    def all_panels(azimuth, altitude):
+    def all_panels(self, azimuth, altitude):
         all_panels =  {"panel_orientation": [ axis for panel in range(30) for axis in [azimuth, altitude] ]}
         self.communicate(all_panels)
         
@@ -212,3 +212,13 @@ class Publisher():
             data = utils.dict_flatten(data_dict)
             self.skt.send_json( json.dumps(data, cls=utils.NpEncoder) )
 
+class UDPServer():
+    def __init__(self, port=9870, ip="127.0.0.1"):
+        logger.debug("Init UDP Server")
+        self.ip = ip
+        self.port = port
+        self.sock  = socket.socket(socket.AF_INET, # Internet
+                             socket.SOCK_DGRAM) # UDP
+                            
+    def publish(self, data):
+        self.sock.sendto(json.dumps(data, cls=utils.NpEncoder).encode('utf-8'), (self.ip, self.port))
