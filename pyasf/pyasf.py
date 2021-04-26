@@ -2,7 +2,8 @@ import zmq
 import json
 from loguru import logger
 import pathlib
-import pyasf.utils
+import pyasf.utils as utils
+import socket
 
 
 class ControllerLink():
@@ -18,12 +19,13 @@ class ControllerLink():
             nr_panel = row*6 + col
 
     Example Usage:
-    controller_link = ControllerLink("192.168.0.10", port="5566")
-    status = controller_link.communicate(data)
-    if status:
-        continue
-    else:
-        break
+
+        controller_link = ControllerLink("192.168.0.10", port="5566")
+        status = controller_link.communicate(data)
+        if status:
+            continue
+        else:
+            break
     
     """
 
@@ -213,6 +215,21 @@ class Publisher():
             self.skt.send_json( json.dumps(data, cls=utils.NpEncoder) )
 
 class UDPServer():
+    """Publisher service for PlotJugler UDPSever with bare udp sockets.
+    Initialization with ip where PlotJugler is running.
+   
+    example:
+
+
+        udp = pyasf.UDPServer()
+        for i in range(10):
+            data = {"a": 0
+                    "b": some_value_b
+                    "array":numpy.random.rand(15)}
+
+            udp.publish(data)
+            
+    """    
     def __init__(self, port=9870, ip="127.0.0.1"):
         logger.debug("Init UDP Server")
         self.ip = ip
@@ -221,4 +238,10 @@ class UDPServer():
                              socket.SOCK_DGRAM) # UDP
                             
     def publish(self, data):
+        """publisher dict. 
+        understand numpy arrays within dict, but only numberic values are passed.
+
+        Args:
+            data (dict): pairs are display in plotjuggler.
+        """        
         self.sock.sendto(json.dumps(data, cls=utils.NpEncoder).encode('utf-8'), (self.ip, self.port))

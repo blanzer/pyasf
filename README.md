@@ -9,7 +9,7 @@
 
 ## Usage
 
-[Documentation](https://htmlpreview.github.io/?https://github.com/blanzer/pyasf/blob/main/doc/pyasf.html)
+[Documentation](https://htmlpreview.github.io/?https://github.com/blanzer/pyasf/blob/main/doc/index.html)
 
 
 ## Install

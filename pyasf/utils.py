@@ -1,7 +1,7 @@
 import zmq
 import json
 from loguru import logger
-
+import numpy as np
 
 def dict_flatten(in_dict, dict_out=None, parent_key=None, separator="_"):
     """flattens dict to serialize"""
