@@ -8,15 +8,17 @@ import socket
 
 class ControllerLink():
     """Handles the communication with the asf controller.
-    Every message send in dict gets acknoledged by the controller.
+    Every message sent gets acknoledged by the controller.
     
     data that will be sent, should have the following format:
-
-        data = {"panel_orientation": [azimuth_0, altitude_0,
-                                      ...
-                                      azimuth_30, altitude_30]}
-        where the number of the panel corresponds to 
-            nr_panel = row*6 + col
+        numpy array shape: (6,5,2). where
+            the first dimensions corresponds to each row
+            the second dimension corresponds to the column
+            and the third dimension corresponds to the angle 
+            
+                The angle it self can be represented in two ways:
+                'local' (with reference to the actuator)
+                'panel' (with reference to the frame).
 
     Example Usage:
 
@@ -29,13 +31,21 @@ class ControllerLink():
     
     """
 
-    def __init__(self, ip, port="5566"):
+    def __init__(self, ip, port="5566", orientation_type="panel"):
+        """
+
+        Args:
+            ip ([type]): [description] ip of controller running
+            port (str, optional): [description]. Defaults to "5566".
+            orientation_type (str, optional): [description]. Defaults to "panel" or "local".
+        """        
         self.context = zmq.Context()
         logger.debug(f"Connecting to controller {ip}:{port}")
         self.ip = ip
         self.port = port
         self.req_socket = None
         self._setup_connection()
+        self.orientation_type = orientation_type
 
     def _setup_connection(self):
         """ call sets sockets settings and connects to controller
@@ -43,6 +53,11 @@ class ControllerLink():
         self.req_socket = self.context.socket(zmq.REQ)
         self.req_socket.connect(f"tcp://{self.ip}:{self.port}")
         self.req_socket.setsockopt(zmq.RCVTIMEO, 50)
+
+    def set_orientation_type(self, orientation_type):
+        """either 'local' or 'panel'
+        """        
+        self.orientation_type = orientation_type
 
     def communicate(self, data):
         """send data to controller and return status
@@ -53,7 +68,16 @@ class ControllerLink():
         Returns:
             bool:  message was received sucessfully
         """
-        self.req_socket.send_json(json.dumps(data, cls=utils.NpEncoder))
+        if isinstance(data, np.ndarray):
+            # data_array =  np.array(data).reshape(6,5,2)
+            self.req_socket.send_json(json.dumps({self.orientation_type: data}, cls=utils.NpEncoder))
+
+        elif isinstance(data, dict):        
+            self.req_socket.send_json(json.dumps(data, cls=utils.NpEncoder))
+        else:
+            logger.warning("Wrong: Data format needs to be a numpy array of size (6,5,2)")
+            return 0
+
         try:
             reply = self.req_socket.recv()
         except zmq.error.Again as ea:
@@ -68,24 +92,29 @@ class ControllerLink():
         return 1
 
     def all_opening(self):
-        open_state =  {"panel_orientation": [ axis for panel in range(30) for axis in [0, 90] ]}
-        self.communicate(open_state)
+        data = np.zeros((6,5,2))
+        data[:,:,:] = [0,90]
+        return self.communicate({"panel_orientation": data})
     
     def all_closing(self):
-        closed_state =  {"panel_orientation": [ axis for panel in range(30) for axis in [0, 10] ]}
-        self.communicate(closed_state)
+        data = np.zeros((6,5,2))
+        data[:,:,:] = [0,10]
+        return self.communicate({"panel_orientation": data})
     
     def all_east(self):
-        all_east =  {"panel_orientation": [ axis for panel in range(30) for axis in [-45, 45] ]}
-        self.communicate(all_east)   
+        data = np.zeros((6,5,2))
+        data[:,:,:] = [-45, 45]
+        return self.communicate(data)   
 
     def all_west(self):
-        all_west =  {"panel_orientation": [ axis for panel in range(30) for axis in [45, 45] ]}
-        self.communicate(all_west)
+        data = np.zeros((6,5,2))
+        data[:,:,:] = [45, 45]
+        return self.communicate(data)
     
     def all_panels(self, azimuth, altitude):
-        all_panels =  {"panel_orientation": [ axis for panel in range(30) for axis in [azimuth, altitude] ]}
-        self.communicate(all_panels)
+        data = np.zeros((6,5,2))
+        data[:,:,:] = [azimuth, altitude]
+        return self.communicate(data)
         
 
 class Datalogger:
